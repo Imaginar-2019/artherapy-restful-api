@@ -1,14 +1,25 @@
 import click
-from flask import Flask, jsonify, abort, make_response, request
+from flask import Flask, jsonify, abort, make_response, request, url_for
 
 # TODO use database
 objects = []
 app = Flask(__name__)
 
 
+# TODO move to utils
+def _generate_uri_for_object(obj):
+    new_obj = {}
+    for field in obj:
+        if field == 'id':
+            new_obj['uri'] = url_for('get_object', object_id=obj['id'], _external=True)
+        else:
+            new_obj[field] = obj[field]
+    return new_obj
+
+
 @app.route('/api/objects', methods=['GET'])
 def get_objects():
-    return jsonify({'objects': objects})
+    return jsonify({'objects': list(map(_generate_uri_for_object, objects))})
 
 
 @app.route('/api/objects/<int:object_id>', methods=['GET'])
@@ -45,6 +56,9 @@ def not_found(error):
 @app.errorhandler(400)
 def cannot_be_created(error):
     return make_response(jsonify({'error': 'Object cannot be created'}), 400)
+
+
+
 
 
 @click.command()
