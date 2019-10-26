@@ -1,21 +1,27 @@
-from config import db, ALLOWED_EXTENSIONS
-from models import ArtObject, summary_schema, coordinate_schema, general_schema, description_schema
-from flask import url_for, abort
+from config import db, app
+from models import ArtObject, summary_schema, general_schema
+from flask import url_for, abort, send_from_directory
 import json
-
-
-def _allowed_image_formats(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+import os
+from werkzeug.utils import secure_filename
 
 
 def _generate_uri_for_object(obj):
     new_obj = {}
     for field in obj:
         if field == 'id':
-            new_obj['uri'] = url_for('get_object', id=obj['id'], _external=True)
+            new_obj['uri'] = url_for('get_artobject_image', id=obj['id'], _external=True)
         new_obj[field] = obj[field]
     return new_obj
+
+
+def _generate_filename(id):
+    return secure_filename(str(id) + '.png')
+
+
+def _generate_filepath(id):
+    filename = _generate_filename(id)
+    return os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
 
 def read_all():
@@ -30,33 +36,31 @@ def read_all():
     return list(map(_generate_uri_for_object, summary))
 
 
-def read_one(id):
-    """
-    This function responds to a request for /api/artobjects/id
-    :param id: id of ArtObject entity
-    :return: json string with data of particular ArtObject
-    """
+def send_image(id):
     artobject = ArtObject.query.filter(
         ArtObject.id == id).one_or_none()
-
-    if artobject is not None:
-        data = coordinate_schema.dump(artobject)
-        return data
-    else:
+    if artobject is None:
         abort(
             404,
             f"ArtObject not found for Id: {id}"
         )
 
+    filename = _generate_filename(id)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype='image/png')
+
 
 def upload_image(files):
+    print(f'FILES: {files}')
+
     if 'image' not in files or 'metadata' not in files:
         abort(400, {'error': 'Object cannot be created. There should be metadata and image files'})
+    image = files['image']
+    if not image:
+        abort(400, {'error': 'Object cannot be created. There should be sn image'})
+
     metadata = json.loads(files['metadata'].read())
     if metadata is None or 'title' not in metadata:
         abort(400, {'error': 'Object cannot be created. There should be title'})
-
-    # TODO validate image file
 
     title = metadata.get("title")
     existing_object = (
@@ -68,34 +72,7 @@ def upload_image(files):
         db.session.add(new_object)
         db.session.commit()
         data = general_schema.dump(new_object)
-
-        # TODO save image
-        return data, 201
-    else:
-        abort(409, f"ArtObject  {title} exists already")
-
-
-def create(artobject):
-    """
-    This function creates a new ArtObject
-    based on the passed in object data
-    :param artobj: ArtObject to create in ArtObject structure
-    :return: 201 on success, 406 on object exists
-    """
-
-    if 'title' not in artobject:
-        abort(400, {'error': 'Object cannot be created. There should be title'})
-
-    title = artobject.get("title")
-    existing_object = (
-        ArtObject.query.filter(ArtObject.title == title).one_or_none()
-    )
-
-    if existing_object is None:
-        new_object = general_schema.load(artobject, session=db.session)
-        db.session.add(new_object)
-        db.session.commit()
-        data = general_schema.dump(new_object)
+        image.save(_generate_filepath(data['id']))
         return data, 201
     else:
         abort(409, f"ArtObject  {title} exists already")

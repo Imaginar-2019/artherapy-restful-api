@@ -4,8 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 DATABASE_NAME = 'artobjects.db'
-UPLOAD_FOLDER = './data/images'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+UPLOAD_FOLDER = 'data/images'
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
