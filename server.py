@@ -1,64 +1,22 @@
 import click
-from flask import Flask, jsonify, abort, make_response, request, url_for
-
-# TODO use database
-objects = []
-app = Flask(__name__)
+from flask import jsonify, request
+from config import app
+from artobjects import read_all, create, read_one
 
 
-# TODO move to utils
-def _generate_uri_for_object(obj):
-    new_obj = {}
-    for field in obj:
-        if field == 'id':
-            new_obj['uri'] = url_for('get_object', object_id=obj['id'], _external=True)
-        else:
-            new_obj[field] = obj[field]
-    return new_obj
-
-
-@app.route('/api/objects', methods=['GET'])
+@app.route('/api/artobjects', methods=['GET'])
 def get_objects():
-    return jsonify({'objects': list(map(_generate_uri_for_object, objects))})
+    return jsonify({'artobjects': read_all()})
 
 
-@app.route('/api/objects/<int:object_id>', methods=['GET'])
-def get_object(object_id):
-    obj = list(filter(lambda o: o['id'] == object_id, objects))
-    if len(obj) == 0:
-        abort(404)
-    return jsonify({'object': obj[0]})
+@app.route('/api/artobjects/body/<int:id>', methods=['GET'])
+def get_object(id):
+    return jsonify({'artobject': read_one(id)})
 
 
-@app.route('/api/objects', methods=['POST'])
+@app.route('/api/artobjects', methods=['POST'])
 def create_object():
-    print(f'REQUEST: {request}')
-    if not request.json or not 'title' in request.json:
-        abort(400)
-
-    if len(objects) == 0:
-        obj_id = 1
-    else:
-        obj_id = objects[-1]['id'] + 1
-    obj = {
-        'id': obj_id,
-        'title': request.json['title'],
-    }
-    objects.append(obj)
-    return jsonify({'object': obj}), 201
-
-
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Object not found'}), 404)
-
-
-@app.errorhandler(400)
-def cannot_be_created(error):
-    return make_response(jsonify({'error': 'Object cannot be created'}), 400)
-
-
-
+    return jsonify({'artobject': create(request.json)})
 
 
 @click.command()
