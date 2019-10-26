@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 DATABASE_NAME = 'artobjects.db'
+UPLOAD_FOLDER = './data/images'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,6 +22,8 @@ sqlite_url = "sqlite:////" + os.path.join(basedir, DATABASE_NAME)
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # Create the SqlAlchemy db instance
 db = SQLAlchemy(app)

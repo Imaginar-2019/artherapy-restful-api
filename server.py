@@ -1,7 +1,7 @@
 import click
 from flask import jsonify, request
 from config import app
-from artobjects import read_all, create, read_one
+from artobjects import read_all, create, read_one, upload_image
 
 
 @app.route('/api/artobjects', methods=['GET'])
@@ -15,8 +15,13 @@ def get_object(id):
 
 
 @app.route('/api/artobjects', methods=['POST'])
-def create_object():
+def upload_artobject():
     return jsonify({'artobject': create(request.json)})
+
+
+@app.route('/api/artobjects/body', methods=['POST'])
+def upload_artobject_image():
+    return jsonify({'artobject': upload_image(request.files)})
 
 
 @click.command()

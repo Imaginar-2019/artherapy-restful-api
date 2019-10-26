@@ -1,6 +1,12 @@
-from config import db
-from models import ArtObject, summary_schema, coordinate_schema, general_schema
+from config import db, ALLOWED_EXTENSIONS
+from models import ArtObject, summary_schema, coordinate_schema, general_schema, description_schema
 from flask import url_for, abort
+import json
+
+
+def _allowed_image_formats(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def _generate_uri_for_object(obj):
@@ -43,7 +49,33 @@ def read_one(id):
         )
 
 
-def create(artobj):
+def upload_image(files):
+    if 'image' not in files or 'metadata' not in files:
+        abort(400, {'error': 'Object cannot be created. There should be metadata and image files'})
+    metadata = json.loads(files['metadata'].read())
+    if metadata is None or 'title' not in metadata:
+        abort(400, {'error': 'Object cannot be created. There should be title'})
+
+    # TODO validate image file
+
+    title = metadata.get("title")
+    existing_object = (
+        ArtObject.query.filter(ArtObject.title == title).one_or_none()
+    )
+
+    if existing_object is None:
+        new_object = general_schema.load(metadata, session=db.session)
+        db.session.add(new_object)
+        db.session.commit()
+        data = general_schema.dump(new_object)
+
+        # TODO save image
+        return data, 201
+    else:
+        abort(409, f"ArtObject  {title} exists already")
+
+
+def create(artobject):
     """
     This function creates a new ArtObject
     based on the passed in object data
@@ -51,17 +83,16 @@ def create(artobj):
     :return: 201 on success, 406 on object exists
     """
 
-    if artobj is None or 'title' not in artobj:
-        abort(400, {'error': 'Object cannot be created'})
+    if 'title' not in artobject:
+        abort(400, {'error': 'Object cannot be created. There should be title'})
 
-    title = artobj.get("title")
-
+    title = artobject.get("title")
     existing_object = (
         ArtObject.query.filter(ArtObject.title == title).one_or_none()
     )
 
     if existing_object is None:
-        new_object = general_schema.load(artobj, session=db.session)
+        new_object = general_schema.load(artobject, session=db.session)
         db.session.add(new_object)
         db.session.commit()
         data = general_schema.dump(new_object)

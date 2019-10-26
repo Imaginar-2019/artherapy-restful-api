@@ -7,7 +7,6 @@ class ArtObject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))
     description = db.Column(db.String(128))
-    # image = db.Column(db.LargeBinary)
     coordinate_id = db.Column(db.Integer, db.ForeignKey('coordinate.id'),
                               nullable=False)
     coordinate = db.relationship('Coordinate',
@@ -23,15 +22,15 @@ class Coordinate(db.Model):
 
 
 class CoordinateSchema(ma.ModelSchema):
-    latitude = fields.Float()
-    longitude = fields.Float()
-    altitude = fields.Float()
+    class Meta:
+        model = Coordinate
+        sqla_session = db.session
 
 
 class ArtObjectSchema(ma.ModelSchema):
-    id = fields.Int(dump_only=True)
-    title = fields.Str()
-    description = fields.Str()
+    class Meta:
+        model = ArtObject
+        sqla_session = db.session
     coordinate = fields.Nested(CoordinateSchema, many=False)
 
 
