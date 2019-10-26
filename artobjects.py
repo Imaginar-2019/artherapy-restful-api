@@ -10,7 +10,7 @@ def _generate_uri_for_object(obj):
     new_obj = {}
     for field in obj:
         if field == 'id':
-            new_obj['uri'] = url_for('get_artobject_image', id=obj['id'], _external=True)
+            new_obj['imageURL'] = url_for('get_artobject_image', id=obj['id'], _external=True)
         new_obj[field] = obj[field]
     return new_obj
 
