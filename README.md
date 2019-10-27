@@ -1,4 +1,7 @@
-# Restful API server for ARtherapy project
+# Restful API server application for ARtherapy project
+
+[The application deployed on Heroku](https://artherapy.herokuapp.com/)
+
 
 ## Getting Started
 
@@ -94,4 +97,18 @@ curl -H GET http://<address>:<port>/api/feedback/body/<id>
 
 ```
 curl -F 'image=@<path/to/image>' http://<address>:<port>/api/feedback'
+```
+
+## Deployment to Heroku
+
+Configure app repo to existing Heroku app:
+
+```
+heroku git:remote -a <heroku-app-name>
+```
+
+Deploy app to Heroku
+
+```
+git push heroku master
 ```

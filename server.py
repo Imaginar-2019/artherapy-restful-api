@@ -1,5 +1,5 @@
 import click
-from flask import jsonify, request
+from flask import jsonify, request, render_template
 from config import app
 import artobjects
 import feedback
@@ -33,6 +33,10 @@ def get_feedback_image(id):
 @app.route('/api/feedback', methods=['POST'])
 def upload_feedback_img():
     return jsonify({'feedback_img': feedback.upload_image(request.files)})
+
+@app.route("/")
+def home():
+    return render_template("home.html")
 
 
 @click.command()
