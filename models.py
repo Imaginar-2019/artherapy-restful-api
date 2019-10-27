@@ -1,6 +1,5 @@
 from config import db, ma
 from marshmallow import fields
-from sqlalchemy import ForeignKey
 
 
 class ArtObject(db.Model):
@@ -20,6 +19,11 @@ class Coordinate(db.Model):
     altitude = db.Column(db.Float)
 
 
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+    id = db.Column(db.Integer, primary_key=True)
+
+
 class CoordinateSchema(ma.ModelSchema):
     class Meta:
         model = Coordinate
@@ -31,6 +35,12 @@ class ArtObjectSchema(ma.ModelSchema):
         model = ArtObject
         sqla_session = db.session
     coordinate = fields.Nested(CoordinateSchema, many=False)
+
+
+class FeedbackSchema(ma.ModelSchema):
+    class Meta:
+        model = Feedback
+        sqla_session = db.session
 
 
 general_schema = ArtObjectSchema()

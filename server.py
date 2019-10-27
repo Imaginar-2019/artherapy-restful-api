@@ -1,22 +1,38 @@
 import click
 from flask import jsonify, request
 from config import app
-from artobjects import read_all, upload_image, send_image
+import artobjects
+import feedback
 
 
 @app.route('/api/artobjects', methods=['GET'])
 def get_artobjects():
-    return jsonify({'artobjects': read_all()})
+    return jsonify({'artobjects': artobjects.get_all()})
 
 
 @app.route('/api/artobjects/body/<int:id>', methods=['GET'])
 def get_artobject_image(id):
-    return send_image(id)
+    return artobjects.send(id)
 
 
 @app.route('/api/artobjects', methods=['POST'])
 def upload_artobject():
-    return jsonify({'artobject': upload_image(request.files)})
+    return jsonify({'artobject': artobjects.upload(request.files)})
+
+
+@app.route('/api/feedback', methods=['GET'])
+def get_feedback():
+    return jsonify({'feedback': feedback.get_all()})
+
+
+@app.route('/api/feedback/body/<int:id>', methods=['GET'])
+def get_feedback_image(id):
+    return feedback.send(id)
+
+
+@app.route('/api/feedback', methods=['POST'])
+def upload_feedback_img():
+    return jsonify({'feedback_img': feedback.upload_image(request.files)})
 
 
 @click.command()
