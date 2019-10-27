@@ -36,7 +36,27 @@ def upload_feedback_img():
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    return """
+    <!DOCTYPE html>
+<html>
+<body>
+
+<h2>Hello!</h2>
+
+This is Restful API server application for ARtherapy project
+
+<h2>List of available endpoints:</h2>
+
+<ul>
+  <li>GET POST /api/artobjects</li>
+  <li>GET /api/artobjects/body/[int:id]</li>
+  <li>GET POST /api/feedback</li>
+  <li>GET /api/feedback/body/[int:id]</li>
+</ul>  
+
+</body>
+</html>    
+    """
 
 
 @click.command()
