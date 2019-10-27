@@ -36,10 +36,13 @@ def upload_feedback_img():
 
 
 @click.command()
-@click.option('--port', default=7777, help='Number of port to listen')
+@click.option('--port', default=5000, help='Number of port to listen')
 @click.option('--address', default='localhost', help='Server address')
 def cli(port, address):
-    app.run(debug=True, host=address, port=port)
+    if address == 'localhost':
+        app.run(threaded=True, port=port)
+    else:
+        app.run(threaded=True, host=address, port=port)
 
 
 if __name__ == '__main__':
