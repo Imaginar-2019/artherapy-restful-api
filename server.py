@@ -12,8 +12,7 @@ def get_artobjects():
 
 @app.route('/api/artobjects/body/<int:id>', methods=['GET'])
 def get_artobject_image(id):
-    return {'ID': str(id)}
-    # return artobjects.send(id)
+    return artobjects.send(id)
 
 
 @app.route('/api/artobjects', methods=['POST'])
